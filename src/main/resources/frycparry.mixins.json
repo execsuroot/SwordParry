@@ -20,7 +20,8 @@
     "client/ClientPlayerInteractionManagerMixin",
     "client/PlayerEntityRendererMixin",
     "client/HeldItemRendererMixin",
-    "client/ItemRendererMixin"
+    "client/ItemRendererMixin",
+    "client/InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

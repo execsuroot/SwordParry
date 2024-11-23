@@ -26,4 +26,9 @@ public interface CanBlock {
     boolean hasParriedRecently();
     void setParryTimer(World world, int ticks);
 
+    int getParryWindow();
+
+    void setParryWindowTimer(int ticks);
+
+    int getParryWindowTimer();
 }

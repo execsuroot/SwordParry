@@ -38,6 +38,7 @@ abstract class ItemMixin implements ToggleableFeature, ItemConvertible, FabricIt
         if(ParryHelper.canParryWithoutShield(user)){
             ((CanBlock) user).setCurrentHandParry(hand);
             ((CanBlock) user).setBlockingDataToTrue();
+            ((CanBlock) user).setParryWindowTimer(getMaxUseTimeParry() - getParryTicks());
             return TypedActionResult.success(itemStack);
         }
         else return TypedActionResult.fail(user.getStackInHand(hand));
@@ -46,6 +47,7 @@ abstract class ItemMixin implements ToggleableFeature, ItemConvertible, FabricIt
     //cooldown after using block
     public void onStoppedUsingParry(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         ((CanBlock) user).setBlockingDataToFalse();
+        ((CanBlock) user).setParryWindowTimer(0);
         Item item = stack.getItem();
 
         //if player stops blocking after parry, cooldown is shorter (and depends on item used)

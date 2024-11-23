@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -41,6 +42,10 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBlock 
     private static final TrackedData<Boolean> PARRY_DATA;
 
     public int parryTimer = 0;
+    @Unique
+    public int parryWindow = 0;
+    @Unique
+    public int parryWindowTimer = 0;
 
     @Shadow
     protected ItemStack activeItemStack;
@@ -337,8 +342,32 @@ abstract class LivingEntityMixin extends Entity implements Attackable, CanBlock 
         return parryTimer > 0;
     }
 
+    @Inject(method = "tick()V", at = @At("TAIL"))
+    private void decrementParryWindowTimer(CallbackInfo info) {
+        if (parryWindowTimer > 0) {
+            parryWindowTimer--;
+        }
+    }
 
+    public int getParryWindow() {
+        return this.parryWindow;
+    }
 
+    public void setParryWindowTimer(int ticks) {
+        this.parryWindow = ticks;
+        this.parryWindowTimer = ticks;
+        boolean isServerSide = !((LivingEntity) (Object) this).getWorld().isClient;
+        if (isServerSide) {
+            ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeInt(ticks);
+            ServerPlayNetworking.send(player, ModPackets.INFORM_CLIENT_ABOUT_PARRY_WINDOW_ID, buf);
+        }
+    }
+
+    public int getParryWindowTimer() {
+        return this.parryWindowTimer;
+    }
 
     //blocking data and parry data
     public void setBlockingDataToTrue(){
